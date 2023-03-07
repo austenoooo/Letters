@@ -5,10 +5,13 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
+let displacementScale = 10;
 
 let scene, camera, renderer;
 
 let line;
+
+let allLines = [];
 
 let allUniforms = [];
 
@@ -64,7 +67,7 @@ function init( font ){
   document.getElementById("letters").appendChild(renderer.domElement);
 
   // change background color
-  let backgroundColor = new THREE.Color(0x284000); // create a color representation from a hex code
+  let backgroundColor = new THREE.Color(0xf5f5f5); // create a color representation from a hex code
   renderer.setClearColor(backgroundColor);
 
   // add orbit control
@@ -80,9 +83,9 @@ function init( font ){
   for (let i = 0; i < letters.length; i++){
 
     let uniforms = {
-      amplitude: {value: 24},
-      opacity: {value: 0.3},
-      color: {value: new THREE.Color(0xffffff)}
+      amplitude: {value: displacementScale},
+      opacity: {value: 0.1},
+      color: {value: new THREE.Color(0x087500)}
     };
 
     allUniforms.push(uniforms);
@@ -91,7 +94,7 @@ function init( font ){
       uniforms: uniforms,
       vertexShader: document.getElementById('vertexshader').textContent,
       fragmentShader: document.getElementById('fragmentshader').textContent,
-      blending: THREE.AdditiveBlending,
+      // blending: THREE.AdditiveBlending,
       depthTest: false,
       transparent: true
     });
@@ -149,6 +152,9 @@ function init( font ){
       // line.rotation.x = 0.2;
       scene.add(line);
       line.position.set(0, cameraYDefault - 100 - 120 * i, 0);
+
+
+      allLines.push(line);
   }
   
 
@@ -173,13 +179,16 @@ document.addEventListener("scroll", (event) => {
   camera.position.set(40, cameraY, 100);
   camera.lookAt(40, cameraY, 0);
 
-  // update shader
+  
   for (let i = 0; i < letters.length; i++){
 
-    // allUniforms[i].amplitude.value = (- Math.abs(Math.sin((- cameraY - 40) * Math.PI / 120)) + 1) * 12;
-    allUniforms[i].amplitude.value = (- Math.sin(cameraY / 30)) * 30;
+    // update shader
+    allUniforms[i].amplitude.value = (- Math.sin(cameraY / 25)) * displacementScale;
 
-    console.log(cameraY);
+    // roatate the letters subtly
+    let rotate = -(Math.PI / 8) * Math.sin((cameraY + 120 * i) / 25);
+    allLines[i].rotation.set(0, rotate, 0);
   }
+  
   
 });
