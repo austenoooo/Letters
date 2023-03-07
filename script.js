@@ -16,14 +16,24 @@ let cameraYDefault = 100;
 
 let letters = ["M", "A", "N", "I", "F", "E", "S", "T", "O"];
 
-let curveTextParameter = {
+let defaultTextParameter = {
   size: 80,
   height: 10,
+  curSegments: 20,
+  bevelThickness: 4,
+  bevelSize: 3,
+  bevelEnabled: true,
+  bevelSegments: 20
+}
+
+let curveTextParameter = {
+  size: 80,
+  height: 1,
   curSegments: 10,
   bevelThickness: 4,
   bevelSize: 3,
   bevelEnabled: true,
-  bevelSegments: 10
+  bevelSegments: 1
 }
 
 const loader = new FontLoader();
@@ -52,6 +62,10 @@ function init( font ){
   renderer = new THREE.WebGLRenderer( {antialias: true} );
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("letters").appendChild(renderer.domElement);
+
+  // change background color
+  let backgroundColor = new THREE.Color(0x284000); // create a color representation from a hex code
+  renderer.setClearColor(backgroundColor);
 
   // add orbit control
   // let controls = new OrbitControls(camera, renderer.domElement);
@@ -82,19 +96,37 @@ function init( font ){
       transparent: true
     });
 
+    let geometry;
 
-    const geometry = new TextGeometry(letters[i], {
-      font: font,
-      
-      size: textParameter.size,
-      height: textParameter.height,
-      curSegments: textParameter.curSegments,
-
-      bevelThickness: textParameter.bevelThickness,
-      bevelSize: textParameter.bevelSize,
-      bevelEnabled: textParameter.bevelEnabled,
-      bevelSegments: textParameter.bevelSegments
-    });
+    if (letters[i] != 'S' && letters[i] != 'O'){
+      geometry = new TextGeometry(letters[i], {
+        font: font,
+        
+        size: defaultTextParameter.size,
+        height: defaultTextParameter.height,
+        curSegments: defaultTextParameter.curSegments,
+  
+        bevelThickness: defaultTextParameter.bevelThickness,
+        bevelSize: defaultTextParameter.bevelSize,
+        bevelEnabled: defaultTextParameter.bevelEnabled,
+        bevelSegments: defaultTextParameter.bevelSegments
+      });
+    }
+    else{
+      geometry = new TextGeometry(letters[i], {
+        font: font,
+        
+        size: curveTextParameter.size,
+        height: curveTextParameter.height,
+        curSegments: curveTextParameter.curSegments,
+  
+        bevelThickness: curveTextParameter.bevelThickness,
+        bevelSize: curveTextParameter.bevelSize,
+        bevelEnabled: curveTextParameter.bevelEnabled,
+        bevelSegments: curveTextParameter.bevelSegments
+      });
+    }
+    
 
     // geometry.center();
 
@@ -102,16 +134,6 @@ function init( font ){
 
       const displacement = new THREE.Float32BufferAttribute(count * 3, 3);
       geometry.setAttribute('displacement', displacement);
-
-      // const customColor = new THREE.Float32BufferAttribute(count * 3, 3);
-      // geometry.setAttribute('customColor', customColor);
-
-      // const color = new THREE.Color(0xfffff);
-
-      // for(let i = 0, l = customColor.count; i < l; i ++) {
-      //   color.setHSL(i/l, 0.5, 0.5);
-      //   color.toArray(customColor.array, i * customColor.itemSize);
-      // }
 
       const array = displacement.array;
 
@@ -155,7 +177,7 @@ document.addEventListener("scroll", (event) => {
   for (let i = 0; i < letters.length; i++){
 
     // allUniforms[i].amplitude.value = (- Math.abs(Math.sin((- cameraY - 40) * Math.PI / 120)) + 1) * 12;
-    allUniforms[i].amplitude.value = (- Math.sin(cameraY / 50)) * 30;
+    allUniforms[i].amplitude.value = (- Math.sin(cameraY / 30)) * 30;
 
     console.log(cameraY);
   }
