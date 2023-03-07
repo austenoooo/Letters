@@ -8,21 +8,23 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 let scene, camera, renderer;
 
-let line, uniforms;
+let line;
+
+let allUniforms = [];
 
 let cameraYDefault = 100;
 
 let letters = ["M", "A", "N", "I", "F", "E", "S", "T", "O"];
 
-let textParameter = {
+let curveTextParameter = {
   size: 80,
   height: 10,
-  curSegments: 100,
+  curSegments: 10,
   bevelThickness: 4,
   bevelSize: 3,
   bevelEnabled: true,
-  bevelSegments: 100
-};
+  bevelSegments: 10
+}
 
 const loader = new FontLoader();
 //'fonts/Lexend_Deca_ExtraBold_Regular.json' or 'fonts/helvetiker_bold.typeface.json'
@@ -61,22 +63,26 @@ function init( font ){
   // scene.add(gridHelper);
 
 
-  uniforms = {
-    amplitude: {value: 2},
-    opacity: {value: 0.3},
-    color: {value: new THREE.Color(0xffffff)}
-  };
-
-  const shaderMaterial = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: document.getElementById('vertexshader').textContent,
-    fragmentShader: document.getElementById('fragmentshader').textContent,
-    blending: THREE.AdditiveBlending,
-    depthTest: false,
-    transparent: true
-  });
-
   for (let i = 0; i < letters.length; i++){
+
+    let uniforms = {
+      amplitude: {value: 24},
+      opacity: {value: 0.3},
+      color: {value: new THREE.Color(0xffffff)}
+    };
+
+    allUniforms.push(uniforms);
+
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: document.getElementById('vertexshader').textContent,
+      fragmentShader: document.getElementById('fragmentshader').textContent,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+      transparent: true
+    });
+
+
     const geometry = new TextGeometry(letters[i], {
       font: font,
       
@@ -97,15 +103,15 @@ function init( font ){
       const displacement = new THREE.Float32BufferAttribute(count * 3, 3);
       geometry.setAttribute('displacement', displacement);
 
-      const customColor = new THREE.Float32BufferAttribute(count * 3, 3);
-      geometry.setAttribute('customColor', customColor);
+      // const customColor = new THREE.Float32BufferAttribute(count * 3, 3);
+      // geometry.setAttribute('customColor', customColor);
 
-      const color = new THREE.Color(0xfffff);
+      // const color = new THREE.Color(0xfffff);
 
-      for(let i = 0, l = customColor.count; i < l; i ++) {
-        color.setHSL(i/l, 0.5, 0.5);
-        color.toArray(customColor.array, i * customColor.itemSize);
-      }
+      // for(let i = 0, l = customColor.count; i < l; i ++) {
+      //   color.setHSL(i/l, 0.5, 0.5);
+      //   color.toArray(customColor.array, i * customColor.itemSize);
+      // }
 
       const array = displacement.array;
 
@@ -122,11 +128,6 @@ function init( font ){
       scene.add(line);
       line.position.set(0, cameraYDefault - 100 - 120 * i, 0);
   }
-
-  
-
-  
-
   
 
 
@@ -149,5 +150,14 @@ document.addEventListener("scroll", (event) => {
   // update cameraY
   camera.position.set(40, cameraY, 100);
   camera.lookAt(40, cameraY, 0);
+
+  // update shader
+  for (let i = 0; i < letters.length; i++){
+
+    // allUniforms[i].amplitude.value = (- Math.abs(Math.sin((- cameraY - 40) * Math.PI / 120)) + 1) * 12;
+    allUniforms[i].amplitude.value = (- Math.sin(cameraY / 50)) * 30;
+
+    console.log(cameraY);
+  }
   
 });
